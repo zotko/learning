@@ -2,40 +2,39 @@
 
 ```mermaid
 graph TD
-    A[Transaction Sources] -->|Real-time| B[Kafka Streaming]
-    B --> C[Feature Engineering]
-    C --> D[ML Models<br/>Ensemble Detection]
-    D -->|Risk Scores| E{Risk Assessment}
-    
-    E -->|High Risk| F[Block & Alert]
-    E -->|Medium Risk| G[Manual Review]
-    E -->|Low Risk| H[Approve Transaction]
-    
-    subgraph Storage
-        I[(Historical Data)]
-        J[(Real-time Cache)]
+    A[Cardholder] -->|Initiates Transaction| B(Payment Gateway)
+    B -->|Transaction Data| C[Ingestion Layer]
+    C -->|Kafka/Kinesis| D[Preprocessing Layer]
+    D -->|Flink/Feast| E[Feature Store]
+    E --> F[Anomaly Detection Layer]
+    F -->|TensorFlow/Isolation Forest| G[Decision Layer]
+    G -->|Approve/Decline| H[Merchant/User]
+    G -->|Alerts| I[Notification Service]
+    G -->|Log Data| J[Storage Layer]
+    J -->|Cassandra/S3| K[Monitoring & Feedback]
+    K -->|Airflow/MLflow| L[Model Retraining]
+    L -->|Updated Models| F
+
+    subgraph Ingestion Layer
+        C[Stream Ingestion<br>Kafka, Kinesis]
     end
-    
-    C --> J
-    D --> I
-    K[Model Retraining] -->|Updated Models| D
-    I --> K
-    
-    L[Monitoring Dashboard] --> K
-    D --> L
-    E --> L
-    
-    classDef source fill:#e1f5fe,stroke:#01579b,stroke-width:2px
-    classDef processing fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
-    classDef ml fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef decision fill:#ffebee,stroke:#c62828,stroke-width:2px
-    classDef storage fill:#fef7e0,stroke:#f57f17,stroke-width:2px
-    classDef monitoring fill:#f1f8e9,stroke:#33691e,stroke-width:2px
-    
-    class A source
-    class B,C processing
-    class D,K ml
-    class E,F,G,H decision
-    class I,J storage
-    class L monitoring
+    subgraph Preprocessing Layer
+        D[Stream Processing<br>Flink, Spark]
+        E[Feature Store<br>Feast]
+    end
+    subgraph Anomaly Detection Layer
+        F[ML Models<br>Rule-Based + Isolation Forest/Autoencoders]
+    end
+    subgraph Decision Layer
+        G[Decision Engine<br>Apache Camel, AWS Step Functions]
+        I[SMS/Email<br>Twilio, SNS]
+    end
+    subgraph Storage & Feedback
+        J[Storage<br>Cassandra, S3, PostgreSQL]
+        K[Monitoring<br>Prometheus, ELK Stack]
+        L[Retraining Pipeline<br>Airflow, MLflow]
+    end
+
+    classDef layer fill:#f9f,stroke:#333,stroke-width:2px;
+    class C,D,E,F,G,I,J,K,L layer;
 ```
